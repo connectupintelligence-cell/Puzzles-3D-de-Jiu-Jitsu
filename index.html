@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BJJ 3D — Puzzles 3D de Jiu-Jitsu & Treino Tático</title>
+  
+  <!-- Meta tags SEO -->
+  <meta name="description" content="Aprenda e teste seu conhecimento tático em Jiu-Jitsu com puzzles 3D interativos. Reconstrua sequências de raspagem, passagem e finalização.">
+  <meta name="keywords" content="Jiu-Jitsu, BJJ, Puzzles 3D, Treino Tático, Raspagem, Passagem de Guarda, Armbar, Triângulo, BJJ Chess">
+  
+  <!-- Google Fonts: Inter + Outfit for combat sport headers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- Three.js & OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <!-- Custom Style -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="#" class="brand-logo" id="logo-btn">
+        <div class="logo-icon">
+          <i class="ph-bold ph-cube"></i>
+        </div>
+        <div class="logo-text">
+          <span class="brand-title">BJJ 3D</span>
+          <span class="brand-subtitle">Tactical Puzzles</span>
+        </div>
+      </a>
+
+      <nav class="nav-menu">
+        <a href="#puzzles-section" class="nav-link active"><i class="ph-bold ph-game-controller"></i> Puzzles 3D</a>
+        <a href="#analysis-section" class="nav-link" id="nav-analysis-btn"><i class="ph-bold ph-chart-polar"></i> Diagnóstico Tático</a>
+        <a href="#bjj-chess-section" class="nav-link"><i class="ph-bold ph-strategy"></i> Visão BJJ Chess</a>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" class="icon-btn" id="sound-toggle-btn" title="Alternar Efeitos Sonoros">
+          <i class="ph-bold ph-speaker-high" id="sound-icon"></i>
+        </button>
+        <button type="button" class="btn-primary-sm" id="quick-play-btn">
+          <i class="ph-bold ph-play"></i> Desafio Rápido
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+      <div class="hero-container">
+        <div class="hero-text-content">
+          <div class="hero-badge">
+            <span class="pulse-dot"></span>
+            <span>NOVO: Puzzles 3D de Posições de BJJ</span>
+          </div>
+
+          <h1 class="hero-title">
+            Treine seu <span class="gradient-text">Olho Tático</span> em Puzzles 3D de Jiu-Jitsu
+          </h1>
+
+          <p class="hero-description">
+            Desmonte raspagens, passagens de guarda e finalizações em <strong>checkpoints 3D interativos</strong>. Reconstrua a sequência exata de cada movimento, teste sua leitura de tatame e descubra seu perfil técnico.
+          </p>
+
+          <div class="hero-stats-row">
+            <div class="stat-card">
+              <span class="stat-number">10</span>
+              <span class="stat-label">Puzzles 3D</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">5</span>
+              <span class="stat-label">Categorias Táticas</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Interativo 360°</span>
+            </div>
+          </div>
+
+          <div class="hero-cta-group">
+            <a href="#puzzles-section" class="btn-hero-primary">
+              <i class="ph-bold ph-play-circle"></i> Começar Desafio 3D
+            </a>
+            <a href="#analysis-section" class="btn-hero-secondary" id="hero-view-analysis-btn">
+              <i class="ph-bold ph-chart-bar"></i> Ver Meu Diagnóstico
+            </a>
+          </div>
+        </div>
+
+        <!-- HERO 3D INTERACTIVE CANVAS PREVIEW -->
+        <div class="hero-3d-wrapper">
+          <div class="hero-3d-card">
+            <div class="canvas-3d-badge">
+              <i class="ph-bold ph-arrows-clockwise"></i> Arraste para girar a câmera em 360°
+            </div>
+            <div id="hero-3d-canvas" class="three-canvas-container"></div>
+            <div class="canvas-controls-overlay">
+              <button class="cam-preset-btn" id="hero-cam-reset" title="Resetar Câmera"><i class="ph-bold ph-arrows-counter-clockwise"></i></button>
+              <button class="cam-preset-btn" id="hero-cam-auto" title="Rotação Automática"><i class="ph-bold ph-arrow-clockwise"></i> Auto</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PUZZLES CATALOG SECTION -->
+    <section class="puzzles-section" id="puzzles-section">
+      <div class="section-container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Catálogo de Puzzles 3D</h2>
+            <p class="section-subtitle">Escolha uma técnica de Jiu-Jitsu para desmontar e reordenar a sequência correta.</p>
+          </div>
+
+          <!-- Category Filters -->
+          <div class="category-filters" id="category-filters">
+            <button class="filter-btn active" data-category="all">
+              <i class="ph-bold ph-grid-four"></i> Todos (10)
+            </button>
+            <button class="filter-btn" data-category="guarda">
+              <i class="ph-bold ph-shield-chevron"></i> Guarda & Raspagem (2)
+            </button>
+            <button class="filter-btn" data-category="passagem">
+              <i class="ph-bold ph-arrow-right"></i> Passagem (2)
+            </button>
+            <button class="filter-btn" data-category="quedas">
+              <i class="ph-bold ph-person-simple-throw"></i> Quedas (2)
+            </button>
+            <button class="filter-btn" data-category="finalizacao">
+              <i class="ph-bold ph-crosshair"></i> Finalizações (3)
+            </button>
+            <button class="filter-btn" data-category="escapada">
+              <i class="ph-bold ph-shield-check"></i> Escapadas (1)
+            </button>
+          </div>
+        </div>
+
+        <!-- Puzzle Cards Grid -->
+        <div class="puzzles-grid" id="puzzles-grid">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVE PUZZLE GAME ARENA (MODAL / OVERLAY VIEW) -->
+    <section class="puzzle-arena-overlay hidden" id="puzzle-arena-overlay">
+      <div class="arena-container">
+        <!-- Arena Header Toolbar -->
+        <div class="arena-header">
+          <div class="arena-title-box">
+            <span class="arena-category-badge" id="arena-category-badge">Guarda & Raspagem</span>
+            <h2 class="arena-title" id="arena-title">Raspagem Tesourinha</h2>
+          </div>
+
+          <div class="arena-meta">
+            <div class="arena-stat">
+              <i class="ph-bold ph-timer"></i>
+              <span id="arena-timer">00:00</span>
+            </div>
+            <div class="arena-stat">
+              <i class="ph-bold ph-trophy"></i>
+              <span>Score: <strong id="arena-score-val">0</strong> pts</span>
+            </div>
+            <button class="btn-close-arena" id="btn-close-arena">
+              <i class="ph-bold ph-x"></i> Sair do Puzzle
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Split Workspace: 3D Viewport on Left, Sequence Reorder Dock on Right -->
+        <div class="arena-split-workspace">
+          <!-- LEFT: Interactive 3D Canvas -->
+          <div class="viewport-3d-card">
+            <div class="viewport-toolbar">
+              <div class="camera-presets-group">
+                <span class="toolbar-label"><i class="ph-bold ph-camera"></i> Ângulo:</span>
+                <button class="preset-btn active" data-preset="default">3D Padrão</button>
+                <button class="preset-btn" data-preset="top">Visão Superior</button>
+                <button class="preset-btn" data-preset="side">Lateral</button>
+                <button class="preset-btn" data-preset="tight">Zoom Pegada</button>
+              </div>
+
+              <div class="camera-actions-group">
+                <button class="icon-tool-btn" id="arena-cam-auto" title="Rotação Automática"><i class="ph-bold ph-arrows-clockwise"></i> Auto</button>
+                <button class="icon-tool-btn" id="arena-cam-reset" title="Resetar Câmera"><i class="ph-bold ph-arrows-counter-clockwise"></i> Reset</button>
+              </div>
+            </div>
+
+            <!-- Three.js Canvas Container for Active Puzzle -->
+            <div id="puzzle-3d-canvas" class="three-canvas-container"></div>
+
+            <!-- Active Checkpoint Info Banner -->
+            <div class="checkpoint-info-banner" id="checkpoint-info-banner">
+              <div class="banner-step-badge" id="banner-step-badge">Inspect 3D</div>
+              <div class="banner-text">
+                <h4 id="banner-step-title">Selecione ou passe o mouse em um checkpoint para examinar em 3D</h4>
+                <p id="banner-step-detail">Gire a câmera com o mouse/toque para estudar as pegadas e alavancagens.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT: Sequence Reorder Dock -->
+          <div class="reorder-dock-card">
+            <div class="dock-header">
+              <h3><i class="ph-bold ph-list-numbers"></i> Ordem do Movimento</h3>
+              <p class="dock-instruction">Arraste os cards para organizar a técnica do primeiro ao último movimento:</p>
+            </div>
+
+            <!-- Checkpoints Drag & Drop List -->
+            <div class="reorder-list" id="checkpoints-reorder-list">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+
+            <!-- Validation & Control Action Buttons -->
+            <div class="dock-actions-row">
+              <button type="button" class="btn-secondary" id="btn-shuffle-puzzle">
+                <i class="ph-bold ph-shuffle"></i> Embaralhar
+              </button>
+              <button type="button" class="btn-accent-verify" id="btn-verify-sequence">
+                <i class="ph-bold ph-check-circle"></i> Verificar Sequência
+              </button>
+            </div>
+
+            <!-- Result Feedback Drawer -->
+            <div class="feedback-drawer hidden" id="feedback-drawer">
+              <div class="feedback-status-header" id="feedback-status-header">
+                <i class="ph-bold ph-check-circle" id="feedback-icon"></i>
+                <div id="feedback-status-text">
+                  <h4 id="feedback-title">Sequência Correta!</h4>
+                  <p id="feedback-subtitle">Você acertou 4 de 4 checkpoints.</p>
+                </div>
+              </div>
+
+              <div class="feedback-tactical-explanation" id="feedback-tactical-explanation">
+                <!-- Tactical details rendered dynamically -->
+              </div>
+
+              <div class="feedback-next-actions">
+                <button type="button" class="btn-primary full-width" id="btn-next-puzzle">
+                  Próximo Puzzle <i class="ph-bold ph-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KNOWLEDGE ANALYSIS & UPSELL MODAL -->
+    <section class="analysis-modal-overlay hidden" id="analysis-modal-overlay">
+      <div class="analysis-card">
+        <button class="btn-close-modal" id="btn-close-analysis"><i class="ph-bold ph-x"></i></button>
+
+        <div class="analysis-header">
+          <div class="analysis-badge"><i class="ph-bold ph-brain"></i> Relatório Automatizado</div>
+          <h2 class="analysis-title">Sua Análise de Conhecimento Tático</h2>
+          <p class="analysis-subtitle">Diagnóstico gerado com base no seu desempenho de acertos e tempo nos puzzles 3D.</p>
+        </div>
+
+        <div class="analysis-body">
+          <!-- Overall IQ Score Banner -->
+          <div class="iq-score-banner">
+            <div class="iq-circle">
+              <span class="iq-number" id="iq-number-val">85%</span>
+              <span class="iq-label">Índice Tático</span>
+            </div>
+            <div class="iq-details">
+              <h3 class="iq-rank-title" id="iq-rank-title">Faixa Roxa Estratégico</h3>
+              <p class="iq-rank-desc" id="iq-rank-desc">Excelente leitura de transições e quebra de postura, com consistência em finalizações.</p>
+              <div class="puzzles-completed-tag">
+                <i class="ph-bold ph-check"></i> <span id="completed-count-text">3 de 10 puzzles concluídos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technical Category Breakdown Bars -->
+          <div class="category-breakdown-section">
+            <h4 class="breakdown-heading"><i class="ph-bold ph-chart-polar"></i> Desempenho por Domínio Técnico</h4>
+            <div class="breakdown-bars-container" id="breakdown-bars-container">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+
+          <!-- Strengths vs Weaknesses Summary Boxes -->
+          <div class="strengths-weakness-grid">
+            <div class="insight-box strength">
+              <div class="insight-header">
+                <i class="ph-bold ph-trend-up"></i>
+                <span>Ponto Forte Dominante</span>
+              </div>
+              <h4 id="strength-title">Passagem de Guarda</h4>
+              <p id="strength-desc">Você identifica e executa cortes de joelho e Toreando com precisão de tempo impecável.</p>
+            </div>
+
+            <div class="insight-box weakness">
+              <div class="insight-header">
+                <i class="ph-bold ph-warning"></i>
+                <span>Ponto de Atenção Crítico</span>
+              </div>
+              <h4 id="weakness-title">Escapadas & Defesa sob Pressão</h4>
+              <p id="weakness-desc">Identificamos hesitação nas pontes e fuga de quadril. Ajustes de esgrima sob os 100kg são recomendados.</p>
+            </div>
+          </div>
+
+          <!-- TAILORED LOW-TICKET UPSELL OFFER FORM -->
+          <div class="lowticket-offer-card" id="lowticket-offer-card">
+            <div class="offer-tag"><i class="ph-bold ph-sparkle"></i> Oferta Recomendada de Ajuste Fino</div>
+            <h3 class="offer-title" id="offer-title">Masterclass: Escapadas de Elite & Defesa Pós-Passagem</h3>
+            <p class="offer-description" id="offer-description">
+              Elimine o ponto fraco detectado no seu diagnóstico. Um guia acelerado passo a passo para nunca mais ficar travado nos 100kg ou na montada.
+            </p>
+
+            <div class="offer-price-row">
+              <div class="price-box">
+                <span class="old-price">De R$ 97,00</span>
+                <span class="current-price">Por R$ 29,90 <small>(Oferta Única)</small></span>
+              </div>
+              <div class="offer-guarantee">
+                <i class="ph-bold ph-shield-check"></i> Garantia 7 Dias
+              </div>
+            </div>
+
+            <form class="lead-capture-form" id="lead-capture-form">
+              <div class="input-row">
+                <input type="email" id="lead-email" placeholder="Digite seu e-mail para receber o relatório completo" required>
+                <button type="submit" class="btn-checkout-upsell">
+                  Garantir com 70% OFF <i class="ph-bold ph-arrow-right"></i>
+                </button>
+              </div>
+              <p class="form-disclaimer"><i class="ph-bold ph-lock"></i> Seus dados estão seguros. Sem spam.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BJJ CHESS ROADMAP TEASER SECTION -->
+    <section class="bjj-chess-section" id="bjj-chess-section">
+      <div class="section-container">
+        <div class="bjj-chess-card">
+          <div class="bjj-chess-badge">
+            <i class="ph-bold ph-strategy"></i> O Futuro do Treino Tático
+          </div>
+
+          <h2 class="bjj-chess-title">Em Breve: <span class="gradient-text">BJJ Chess 3D</span></h2>
+          <p class="bjj-chess-desc">
+            Estes puzzles são a base de um ecossistema completo de combate estratégico. O BJJ Chess levará a lógica das transições de tatame para um jogo multiplayer de xadrez de Jiu-Jitsu em tempo real.
+          </p>
+
+          <div class="roadmap-features-grid">
+            <div class="feature-item">
+              <i class="ph-bold ph-users-three"></i>
+              <h4>Combates PvP em Tempo Real</h4>
+              <p>Antecipe os movimentos do oponente e aplique contra-ataques biomecânicos em 3D.</p>
+            </div>
+
+            <div class="feature-item">
+              <i class="ph-bold ph-path"></i>
+              <h4>Árvore de Transições Reais</h4>
+              <p>Cada posição do tatame mapeada com suas saídas, raspagens e raspagens de volta.</p>
+            </div>
+
+            <div class="feature-item">
+              <i class="ph-bold ph-crown"></i>
+              <h4>Ranking & Ligas de Faixas</h4>
+              <p>Evolua de Faixa Branca a Faixa Preta Estratégico no leaderboard global.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="logo-icon-sm"><i class="ph-bold ph-cube"></i></div>
+        <span>BJJ 3D — Tactical Puzzles</span>
+      </div>
+      <p class="footer-copy">&copy; 2026 BJJ 3D Engine. Todos os direitos reservados. Feito para praticantes e estrategistas de Jiu-Jitsu.</p>
+    </div>
+  </footer>
+
+  <!-- Application Scripts -->
+  <script src="puzzles-data.js"></script>
+  <script src="bjj-3d-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
