@@ -1,6 +1,6 @@
 /**
  * BJJ 3D Engine - Motor 3D Baseado no Repositório Oficial GrappleMap (Eelis/GrappleMap)
- * Implementa rigorosamente os 28 segmentos corporais e 23 articulações do padrão GrappleMap (Eelis).
+ * Renderizador de alta precisão com 28 segmentos anatômicos e 23 articulações (Eelis Standard).
  */
 
 // ── GrappleMap Standard Joint Indices (Eelis/GrappleMap) ─────────────────────
@@ -65,7 +65,7 @@ class BJJPoseBuilder {
     }
   }
 
-  // ── 1. Guarda Fechada Por Baixo (GrappleMap Eelis Standard)
+  // ── 1. Guarda Fechada Por Baixo (Tori de costas no chão)
   static createClosedGuardBottom() {
     return [
       [-0.06, 0.28, 0.25], // 0:LeftToe
@@ -94,7 +94,7 @@ class BJJPoseBuilder {
     ];
   }
 
-  // ── 1. Guarda Fechada Por Cima
+  // ── 1. Guarda Fechada Por Cima (Uke de joelhos na guarda com postura quebrada)
   static createClosedGuardTopBroken() {
     return [
       [-0.18, 0.02, 0.38], // 0:LeftToe
@@ -301,34 +301,17 @@ class GrappleHumanoidRig {
     this.group = new THREE.Group();
     this.scene.add(this.group);
 
-    // Official Eelis/GrappleMap Athlete Colors & Materials
+    // Official Eelis/GrappleMap Standard Materials
     this.skinMat = new THREE.MeshStandardMaterial({
       color: skinColorHex,
-      roughness: 0.38,
+      roughness: 0.40,
       metalness: 0.05
     });
 
     this.giMat = new THREE.MeshStandardMaterial({
       color: giColorHex,
-      roughness: 0.65,
+      roughness: 0.60,
       metalness: 0.05
-    });
-
-    this.lapelMat = new THREE.MeshStandardMaterial({
-      color: isTori ? 0xffffff : 0xf59e0b,
-      roughness: 0.45
-    });
-
-    this.beltMat = new THREE.MeshStandardMaterial({
-      color: 0x111827,
-      roughness: 0.50,
-      metalness: 0.10
-    });
-
-    this.rankSleeveMat = new THREE.MeshStandardMaterial({
-      color: 0xd97706,
-      roughness: 0.30,
-      metalness: 0.10
     });
 
     // ── Official Eelis/GrappleMap 28 Segment Table ──
@@ -407,22 +390,6 @@ class GrappleHumanoidRig {
       return { sphere, jIdx };
     });
 
-    // BJJ Gi Lapel Collar V-Cross
-    this.lapelL = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.28, 0.035), this.lapelMat);
-    this.lapelR = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.28, 0.035), this.lapelMat);
-    this.group.add(this.lapelL);
-    this.group.add(this.lapelR);
-
-    // Belt Ring & Rank Sleeve
-    this.beltRing = new THREE.Mesh(new THREE.CylinderGeometry(0.092, 0.096, 0.065, 16), this.beltMat);
-    this.beltRing.castShadow = true;
-    this.group.add(this.beltRing);
-
-    this.beltKnot = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.065, 0.065), this.beltMat);
-    this.rankSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.075, 0.022), this.rankSleeveMat);
-    this.group.add(this.beltKnot);
-    this.group.add(this.rankSleeve);
-
     this.currentJoints = null;
     this.targetJoints = null;
   }
@@ -482,35 +449,6 @@ class GrappleHumanoidRig {
     this.jointSpheres.forEach(({ sphere, jIdx }) => {
       sphere.position.copy(P(jIdx));
     });
-
-    // 3. Orient Gi Lapel Collar to Chest Spine Segment
-    const corePos = P(20);
-    const neckPos = P(21);
-    const spine = neckPos.clone().sub(corePos);
-    const chestMid = corePos.clone().add(neckPos).multiplyScalar(0.5);
-
-    const lShoulder = P(10);
-    const rShoulder = P(11);
-    const shoulderLine = rShoulder.clone().sub(lShoulder);
-    const chestFwd = shoulderLine.clone().cross(spine).normalize();
-
-    this.lapelL.position.copy(chestMid.clone().add(shoulderLine.clone().multiplyScalar(-0.18)).add(chestFwd.clone().multiplyScalar(0.07)));
-    this.lapelR.position.copy(chestMid.clone().add(shoulderLine.clone().multiplyScalar(0.18)).add(chestFwd.clone().multiplyScalar(0.07)));
-
-    this.lapelL.quaternion.setFromUnitVectors(UP, spine.clone().normalize());
-    this.lapelR.quaternion.setFromUnitVectors(UP, spine.clone().normalize());
-
-    // 4. Position Belt Ring & Knot on Waist Line
-    const lHip = P(8);
-    const rHip = P(9);
-    const waistPos = corePos.clone().add(lHip.clone().add(rHip).multiplyScalar(0.5)).multiplyScalar(0.5);
-
-    this.beltRing.position.copy(waistPos);
-    this.beltRing.quaternion.setFromUnitVectors(UP, spine.clone().normalize());
-
-    const waistFwd = rHip.clone().sub(lHip).cross(spine).normalize();
-    this.beltKnot.position.copy(waistPos.clone().add(waistFwd.clone().multiplyScalar(0.09)));
-    this.rankSleeve.position.copy(waistPos.clone().add(waistFwd.clone().multiplyScalar(0.10)).sub(new THREE.Vector3(0, 0.04, 0)));
   }
 
   setVisible(visible) {
