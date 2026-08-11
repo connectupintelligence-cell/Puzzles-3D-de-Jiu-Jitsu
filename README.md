@@ -50,13 +50,18 @@ Divididos em 5 categorias do mapa tático de Jiu-Jitsu:
 
 ```
 .
-├── index.html         # Landing Page, Catálogo de Puzzles e Game Arena 3D
-├── style.css          # Design System Dark Mode com Glassmorphism
-├── bjj-3d-engine.js   # Motor 3D em Three.js com materiais PBR e lutadores BJJ
-├── puzzles-data.js    # Base de dados com os 10 Puzzles e poses 3D
-├── app.js             # Lógica de ordenação, validação e relatório tático
-├── server.js          # Servidor HTTP estático nativo em Node.js (Porta 3000)
-└── README.md          # Documentação do repositório
+├── index.html            # Landing Page, Catálogo de Puzzles e Game Arena 3D
+├── style.css             # Design System Dark Mode com Glassmorphism
+├── bjj-3d-engine.js      # Motor 3D em Three.js com materiais PBR e lutadores BJJ
+├── puzzles-data.js       # Base de dados com os 10 Puzzles e poses 3D
+├── app.js                # Lógica de ordenação, validação e relatório tático
+├── server.js             # Servidor HTTP estático nativo em Node.js (Porta 3000)
+├── README.md             # Documentação do repositório
+└── grapplemap-engine/    # Motor & Dados de Posições 3D GrappleMap (bjjcortex-hub/3d-puzzle)
+    ├── GrappleMap_humanoid.html  # Viewer 3D Humanoide
+    ├── GrappleMap.xlsx           # Dataset de Coordenadas de Jiu-Jitsu
+    ├── export_humanoid.py        # Exportador Python
+    └── main.py                   # Script Principal
 ```
 
 ---
