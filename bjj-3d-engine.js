@@ -1,6 +1,6 @@
 /**
  * BJJ 3D Engine - Motor 3D com Integração GrappleMap (bjjcortex-hub/3d-puzzle)
- * Suporte a 23 articulações anatômicas (Joint Reference), extração de poses GrappleMap e avatares Humanoides.
+ * Renderizador de bonecos 3D anatômicos de Jiu-Jitsu com articulações GrappleMap.
  */
 
 // ── Joint Index Reference (GrappleMap Standard) ──────────────────────────────
@@ -11,98 +11,128 @@
 // 16:LeftHand 17:RightHand 18:LeftFingers 19:RightFingers
 // 20:Core  21:Neck  22:Head
 
-class GrapplePoseExtractor {
-  static extractFromJoints(joints) {
-    if (!joints || joints.length < 23) return null;
-    const P = (i) => new THREE.Vector3(joints[i][0], joints[i][1], joints[i][2]);
-    const mid = (a, b) => a.clone().add(b).multiplyScalar(0.5);
-
-    const lHip = P(8), rHip = P(9);
-    const lShoulder = P(10), rShoulder = P(11);
-    const core = P(20), neck = P(21);
-
-    const root = mid(lHip, rHip);
-    const chest = mid(lShoulder, rShoulder);
-
-    let hipRight = rHip.clone().sub(lHip);
-    const spineVec = neck.clone().sub(core);
-    let hipFwd = hipRight.clone().cross(spineVec);
-    if (hipFwd.lengthSq() < 0.0001) hipFwd.set(0, 0, 1);
-    let hipUp = hipFwd.clone().cross(hipRight);
-    if (hipUp.lengthSq() < 0.0001) hipUp.set(0, 1, 0);
-
-    hipRight.normalize();
-    hipFwd.normalize();
-    hipUp.normalize();
-
-    return {
-      root, chest, neck: P(21), head: P(22),
-      lShoulder, lElbow: P(12), lWrist: P(14),
-      rShoulder, rElbow: P(13), rWrist: P(15),
-      lHip, lKnee: P(6), lAnkle: P(4),
-      rHip, rKnee: P(7), rAnkle: P(5),
-      hipRight, hipUp, hipFwd
-    };
-  }
-}
-
 class GrappleHumanoidRig {
-  constructor(scene, colorHex, giColorHex, isTori = true) {
+  constructor(scene, skinColorHex, giColorHex, isTori = true) {
     this.scene = scene;
     this.group = new THREE.Group();
     this.scene.add(this.group);
 
-    // Materials
-    this.skinMat = new THREE.MeshStandardMaterial({ color: 0xe0a96d, roughness: 0.35, metalness: 0.05 });
-    this.giMat = new THREE.MeshStandardMaterial({ color: giColorHex, roughness: 0.55, metalness: 0.05 });
-    this.lapelMat = new THREE.MeshStandardMaterial({ color: isTori ? 0xffffff : 0xf59e0b, roughness: 0.4 });
-    this.beltMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.5 });
-    this.rankMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3 });
+    // High quality materials
+    this.skinMat = new THREE.MeshStandardMaterial({
+      color: skinColorHex,
+      roughness: 0.40,
+      metalness: 0.05
+    });
 
-    // Segment Defs: [j1, j2, radius, isSkin]
-    const defs = [
-      // Torso / Spine
-      [20, 10, 0.045, false], [20, 11, 0.045, false],
-      [20,  8, 0.052, false], [20,  9, 0.052, false],
-      [10, 11, 0.040, false], [ 8,  9, 0.046, false],
-      [20, 21, 0.030, false], [21, 22, 0.022, true],
+    this.giMat = new THREE.MeshStandardMaterial({
+      color: giColorHex,
+      roughness: 0.65,
+      metalness: 0.05
+    });
+
+    this.beltMat = new THREE.MeshStandardMaterial({
+      color: 0x111827,
+      roughness: 0.50,
+      metalness: 0.10
+    });
+
+    this.rankSleeveMat = new THREE.MeshStandardMaterial({
+      color: 0xd97706, // Red/Gold Rank Sleeve
+      roughness: 0.30,
+      metalness: 0.10
+    });
+
+    // 23-joint Segment Definitions: [jointStart, jointEnd, radiusStart, radiusEnd, isSkin]
+    const segmentDefs = [
+      // Spine / Torso
+      [20, 21, 0.070, 0.055, false], // Spine Core to Neck
+      [21, 22, 0.035, 0.030, true],  // Neck to Head
+      [20, 10, 0.065, 0.050, false], // Core to L Shoulder
+      [20, 11, 0.065, 0.050, false], // Core to R Shoulder
+      [10, 11, 0.055, 0.055, false], // Shoulder Collar
+      [20,  8, 0.070, 0.055, false], // Core to L Hip
+      [20,  9, 0.070, 0.055, false], // Core to R Hip
+      [ 8,  9, 0.060, 0.060, false], // Pelvis / Hip Line
       // Left Leg
-      [ 8,  6, 0.042, false], [ 6,  4, 0.032, false], [ 4,  0, 0.016, true],
+      [ 8,  6, 0.060, 0.048, false], // L Thigh
+      [ 6,  4, 0.045, 0.036, false], // L Calf
+      [ 4,  0, 0.024, 0.016, true],  // L Foot
       // Right Leg
-      [ 9,  7, 0.042, false], [ 7,  5, 0.032, false], [ 5,  1, 0.016, true],
+      [ 9,  7, 0.060, 0.048, false], // R Thigh
+      [ 7,  5, 0.045, 0.036, false], // R Calf
+      [ 5,  1, 0.024, 0.016, true],  // R Foot
       // Left Arm
-      [10, 12, 0.032, false], [12, 14, 0.024, false], [14, 16, 0.016, true],
+      [10, 12, 0.042, 0.034, false], // L Upper Arm
+      [12, 14, 0.032, 0.026, false], // L Forearm
+      [14, 16, 0.022, 0.016, true],  // L Hand
       // Right Arm
-      [11, 13, 0.032, false], [13, 15, 0.024, false], [15, 17, 0.016, true]
+      [11, 13, 0.042, 0.034, false], // R Upper Arm
+      [13, 15, 0.032, 0.026, false], // R Forearm
+      [15, 17, 0.022, 0.016, true]   // R Hand
     ];
 
-    this.segments = defs.map(([j1, j2, r, isSkin]) => {
-      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 12, 1), isSkin ? this.skinMat : this.giMat);
+    this.segments = segmentDefs.map(([j1, j2, r1, r2, isSkin]) => {
+      const geo = new THREE.CylinderGeometry(r2, r1, 1, 12, 1);
+      const mesh = new THREE.Mesh(geo, isSkin ? this.skinMat : this.giMat);
       mesh.castShadow = true;
+      mesh.receiveShadow = true;
       this.group.add(mesh);
       return { mesh, j1, j2 };
     });
 
-    // Anatomical Head
-    this.head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 16), this.skinMat);
+    // Head Sphere
+    this.head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 18, 18), this.skinMat);
     this.head.castShadow = true;
     this.group.add(this.head);
 
-    // Gi Lapel Chest V
-    this.lapelL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.28, 0.04), this.lapelMat);
-    this.lapelR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.28, 0.04), this.lapelMat);
-    this.group.add(this.lapelL);
-    this.group.add(this.lapelR);
+    // Belt Ring on Waist
+    this.beltRing = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.09, 0.06, 14), this.beltMat);
+    this.beltRing.castShadow = true;
+    this.group.add(this.beltRing);
 
-    // BJJ Belt Knot & Rank Sleeve
-    this.beltKnot = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.07, 0.08), this.beltMat);
-    this.rankSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.02), this.rankMat);
+    // Belt Knot & Rank Sleeve
+    this.beltKnot = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), this.beltMat);
+    this.rankSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.07, 0.02), this.rankSleeveMat);
     this.group.add(this.beltKnot);
     this.group.add(this.rankSleeve);
+
+    // Current & Target Joints for Lerp Animation
+    this.currentJoints = null;
+    this.targetJoints = null;
   }
 
-  updateJoints(joints) {
+  updateJoints(joints, immediate = false) {
     if (!joints || joints.length < 23) return;
+
+    if (immediate || !this.currentJoints) {
+      this.currentJoints = joints.map(j => [...j]);
+      this.targetJoints = joints.map(j => [...j]);
+      this.applyJoints(this.currentJoints);
+    } else {
+      this.targetJoints = joints.map(j => [...j]);
+    }
+  }
+
+  animateLerp(lerpFactor = 0.12) {
+    if (!this.currentJoints || !this.targetJoints) return;
+
+    let needsUpdate = false;
+    for (let i = 0; i < 23; i++) {
+      for (let k = 0; k < 3; k++) {
+        const diff = this.targetJoints[i][k] - this.currentJoints[i][k];
+        if (Math.abs(diff) > 0.0001) {
+          this.currentJoints[i][k] += diff * lerpFactor;
+          needsUpdate = true;
+        }
+      }
+    }
+
+    if (needsUpdate) {
+      this.applyJoints(this.currentJoints);
+    }
+  }
+
+  applyJoints(joints) {
     const P = (i) => new THREE.Vector3(joints[i][0], joints[i][1], joints[i][2]);
     const UP = new THREE.Vector3(0, 1, 0);
     const D = new THREE.Vector3();
@@ -121,18 +151,27 @@ class GrappleHumanoidRig {
       mesh.quaternion.setFromUnitVectors(UP, D.normalize());
     });
 
-    // Position Head
-    this.head.position.copy(P(22));
+    // Head Position
+    const headPos = P(22);
+    this.head.position.copy(headPos);
 
-    // Position Lapels & Belt on Core
+    // Belt Position & Orientation at Core / Hip level
     const corePos = P(20);
-    const neckPos = P(21);
-    const chestPos = corePos.clone().add(neckPos).multiplyScalar(0.5);
+    const lHipPos = P(8);
+    const rHipPos = P(9);
+    const hipCenter = lHipPos.clone().add(rHipPos).multiplyScalar(0.5);
+    const waistPos = corePos.clone().add(hipCenter).multiplyScalar(0.5);
 
-    this.lapelL.position.set(chestPos.x - 0.06, chestPos.y + 0.02, chestPos.z + 0.08);
-    this.lapelR.position.set(chestPos.x + 0.06, chestPos.y + 0.02, chestPos.z + 0.08);
-    this.beltKnot.position.set(corePos.x, corePos.y - 0.02, corePos.z + 0.1);
-    this.rankSleeve.position.set(corePos.x - 0.02, corePos.y - 0.08, corePos.z + 0.11);
+    this.beltRing.position.copy(waistPos);
+
+    // Forward direction from hip line
+    const hipRight = rHipPos.clone().sub(lHipPos);
+    const neckPos = P(21);
+    const spine = neckPos.clone().sub(corePos);
+    const fwd = hipRight.clone().cross(spine).normalize();
+
+    this.beltKnot.position.copy(waistPos.clone().add(fwd.clone().multiplyScalar(0.09)));
+    this.rankSleeve.position.copy(waistPos.clone().add(fwd.clone().multiplyScalar(0.10)).sub(new THREE.Vector3(0, 0.04, 0)));
   }
 
   setVisible(visible) {
@@ -155,8 +194,8 @@ class BJJ3DEngine {
     this.controls = null;
 
     // 3D Humanoid Rigs (GrappleMap 23-Joint System)
-    this.toriRig = null;
-    this.ukeRig = null;
+    this.toriRig = null; // Tori (Royal Blue Gi)
+    this.ukeRig = null;  // Uke (Dark Carbon Gi)
     this.matGroup = null;
 
     // Animation & State
@@ -179,7 +218,7 @@ class BJJ3DEngine {
 
     // 2. Camera setup
     this.camera = new THREE.PerspectiveCamera(42, this.width / this.height, 0.1, 100);
-    this.camera.position.set(2.6, 2.3, 3.9);
+    this.camera.position.set(2.4, 2.0, 3.4);
 
     // 3. Renderer setup
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
@@ -188,7 +227,7 @@ class BJJ3DEngine {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.15;
 
     // Clear container and append canvas
     this.container.innerHTML = "";
@@ -201,12 +240,12 @@ class BJJ3DEngine {
       this.controls.enableDamping = true;
       this.controls.dampingFactor = 0.05;
       this.controls.maxPolarAngle = Math.PI / 2 + 0.08;
-      this.controls.minDistance = 1.2;
-      this.controls.maxDistance = 8.0;
-      this.controls.target.set(0, 0.5, 0);
+      this.controls.minDistance = 1.0;
+      this.controls.maxDistance = 7.0;
+      this.controls.target.set(0, 0.45, 0);
     }
 
-    // 5. Lighting Studio
+    // 5. Studio Lighting
     this.setupLighting();
 
     // 6. Build Tatame (BJJ Mat)
@@ -228,27 +267,27 @@ class BJJ3DEngine {
   }
 
   setupLighting() {
-    const hemiLight = new THREE.HemisphereLight(0xfff8ee, 0x0f172a, 1.1);
+    const hemiLight = new THREE.HemisphereLight(0xfff8ee, 0x0f172a, 1.2);
     hemiLight.position.set(0, 10, 0);
     this.scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfffaed, 1.6);
-    keyLight.position.set(4.5, 6.5, 4.5);
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 1.8);
+    keyLight.position.set(4.0, 6.0, 4.0);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
     keyLight.shadow.mapSize.height = 2048;
     keyLight.shadow.bias = -0.0008;
     this.scene.add(keyLight);
 
-    const cyanRim = new THREE.DirectionalLight(0x38bdf8, 1.4);
-    cyanRim.position.set(-4.5, 3.5, -3.5);
+    const cyanRim = new THREE.DirectionalLight(0x38bdf8, 1.5);
+    cyanRim.position.set(-4.0, 3.0, -3.0);
     this.scene.add(cyanRim);
 
-    const goldPoint = new THREE.PointLight(0xf59e0b, 1.8, 7);
-    goldPoint.position.set(0, 2.8, 0);
+    const goldPoint = new THREE.PointLight(0xf59e0b, 1.6, 6);
+    goldPoint.position.set(0, 2.5, 0);
     this.scene.add(goldPoint);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
     this.scene.add(ambientLight);
   }
 
@@ -266,7 +305,7 @@ class BJJ3DEngine {
     matMesh.receiveShadow = true;
     this.matGroup.add(matMesh);
 
-    const outerRingGeo = new THREE.RingGeometry(1.5, 1.55, 64);
+    const outerRingGeo = new THREE.RingGeometry(1.5, 1.54, 64);
     const outerRingMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
     const outerRingMesh = new THREE.Mesh(outerRingGeo, outerRingMat);
     outerRingMesh.rotation.x = Math.PI / 2;
@@ -288,65 +327,73 @@ class BJJ3DEngine {
   }
 
   buildFighters() {
-    // GrappleMap Humanoid Rig for Tori (Royal Blue Gi) & Uke (Dark Carbon Gi)
-    this.toriRig = new GrappleHumanoidRig(this.scene, 0xd4cbc0, 0x1d4ed8, true);
-    this.ukeRig = new GrappleHumanoidRig(this.scene, 0x1e3a6e, 0x1e293b, false);
+    // Tori: Skin tone 0xe0a96d, Royal Blue Gi 0x1d4ed8
+    this.toriRig = new GrappleHumanoidRig(this.scene, 0xe0a96d, 0x1d4ed8, true);
+    // Uke: Skin tone 0xd49b6a, Dark Carbon Gi 0x1e293b
+    this.ukeRig = new GrappleHumanoidRig(this.scene, 0xd49b6a, 0x1e293b, false);
 
-    // Initial default GrappleMap 23-joint standing/guard poses
-    const defaultToriJoints = this.createDefaultJoints(0, 0.4, 0);
-    const defaultUkeJoints = this.createDefaultJoints(0, 0.4, 0.3, true);
+    // Set initial clean grappling engagement pose where both feet rest properly on tatami floor (y=0)
+    const toriJoints = this.generateStandingJoints(-0.35, 0, false);
+    const ukeJoints = this.generateStandingJoints(0.35, 3.14, true);
 
-    this.toriRig.updateJoints(defaultToriJoints);
-    this.ukeRig.updateJoints(defaultUkeJoints);
+    this.toriRig.updateJoints(toriJoints, true);
+    this.ukeRig.updateJoints(ukeJoints, true);
   }
 
-  createDefaultJoints(ox, oy, oz, isOpponent = false) {
-    const rotZ = isOpponent ? 3.14 : 0;
-    // 23 3D Joint positions array matching GrappleMap reference
+  generateStandingJoints(offsetX, angleRad, isOpponent = false) {
+    const cos = Math.cos(angleRad);
+    const sin = Math.sin(angleRad);
+
+    const transformPoint = (x, y, z) => {
+      const rx = x * cos - z * sin;
+      const rz = x * sin + z * cos;
+      return [rx + offsetX, y, rz];
+    };
+
+    // Realistic BJJ 23-joint anatomical posture where feet touch y=0
     return [
-      [ox - 0.12, oy + 0.0, oz + 0.18],  // 0:LeftToe
-      [ox + 0.12, oy + 0.0, oz + 0.18],  // 1:RightToe
-      [ox - 0.12, oy + 0.0, oz - 0.05],  // 2:LeftHeel
-      [ox + 0.12, oy + 0.0, oz - 0.05],  // 3:RightHeel
-      [ox - 0.12, oy + 0.05, oz],        // 4:LeftAnkle
-      [ox + 0.12, oy + 0.05, oz],        // 5:RightAnkle
-      [ox - 0.13, oy + 0.28, oz + 0.02], // 6:LeftKnee
-      [ox + 0.13, oy + 0.28, oz + 0.02], // 7:RightKnee
-      [ox - 0.12, oy + 0.50, oz],        // 8:LeftHip
-      [ox + 0.12, oy + 0.50, oz],        // 9:RightHip
-      [ox - 0.24, oy + 0.82, oz],        // 10:LeftShoulder
-      [ox + 0.24, oy + 0.82, oz],        // 11:RightShoulder
-      [ox - 0.32, oy + 0.65, oz + 0.1],  // 12:LeftElbow
-      [ox + 0.32, oy + 0.65, oz + 0.1],  // 13:RightElbow
-      [ox - 0.28, oy + 0.52, oz + 0.25], // 14:LeftWrist
-      [ox + 0.28, oy + 0.52, oz + 0.25], // 15:RightWrist
-      [ox - 0.28, oy + 0.48, oz + 0.28], // 16:LeftHand
-      [ox + 0.28, oy + 0.48, oz + 0.28], // 17:RightHand
-      [ox - 0.28, oy + 0.45, oz + 0.30], // 18:LeftFingers
-      [ox + 0.28, oy + 0.45, oz + 0.30], // 19:RightFingers
-      [ox,       oy + 0.50, oz],        // 20:Core
-      [ox,       oy + 0.85, oz],        // 21:Neck
-      [ox,       oy + 0.98, oz]         // 22:Head
+      transformPoint(-0.14, 0.02, 0.16),  // 0:LeftToe
+      transformPoint(0.14, 0.02, 0.16),   // 1:RightToe
+      transformPoint(-0.14, 0.02, -0.06), // 2:LeftHeel
+      transformPoint(0.14, 0.02, -0.06),  // 3:RightHeel
+      transformPoint(-0.14, 0.06, 0.0),   // 4:LeftAnkle
+      transformPoint(0.14, 0.06, 0.0),    // 5:RightAnkle
+      transformPoint(-0.15, 0.42, 0.08),  // 6:LeftKnee (BJJ combat bend)
+      transformPoint(0.15, 0.42, 0.08),   // 7:RightKnee
+      transformPoint(-0.14, 0.78, 0.0),   // 8:LeftHip
+      transformPoint(0.14, 0.78, 0.0),    // 9:RightHip
+      transformPoint(-0.22, 1.28, -0.02), // 10:LeftShoulder
+      transformPoint(0.22, 1.28, -0.02),  // 11:RightShoulder
+      transformPoint(-0.26, 1.05, 0.18),  // 12:LeftElbow (Ready grip posture)
+      transformPoint(0.26, 1.05, 0.18),   // 13:RightElbow
+      transformPoint(-0.22, 0.95, 0.35),  // 14:LeftWrist
+      transformPoint(0.22, 0.95, 0.35),   // 15:RightWrist
+      transformPoint(-0.22, 0.92, 0.38),  // 16:LeftHand
+      transformPoint(0.22, 0.92, 0.38),   // 17:RightHand
+      transformPoint(-0.22, 0.89, 0.40),  // 18:LeftFingers
+      transformPoint(0.22, 0.89, 0.40),   // 19:RightFingers
+      transformPoint(0.0, 0.80, 0.0),     // 20:Core
+      transformPoint(0.0, 1.32, -0.02),   // 21:Neck
+      transformPoint(0.0, 1.48, -0.02)    // 22:Head
     ];
   }
 
   setPose(poseData) {
     if (!poseData) return;
 
-    // Check if GrappleMap 23-joint arrays are provided
     if (poseData.toriJoints && this.toriRig) {
       this.toriRig.updateJoints(poseData.toriJoints);
     } else if (poseData.tori && this.toriRig) {
-      const pos = poseData.tori.position || [0, 0.4, 0];
-      const joints = this.createDefaultJoints(pos[0], pos[1], pos[2], false);
+      const pos = poseData.tori.position || [-0.35, 0, 0];
+      const joints = this.generateStandingJoints(pos[0], pos[2] || 0, false);
       this.toriRig.updateJoints(joints);
     }
 
     if (poseData.ukeJoints && this.ukeRig) {
       this.ukeRig.updateJoints(poseData.ukeJoints);
     } else if (poseData.uke && this.ukeRig) {
-      const pos = poseData.uke.position || [0, 0.4, 0.3];
-      const joints = this.createDefaultJoints(pos[0], pos[1], pos[2], true);
+      const pos = poseData.uke.position || [0.35, 0, 0];
+      const joints = this.generateStandingJoints(pos[0], pos[2] || 3.14, true);
       this.ukeRig.updateJoints(joints);
     }
   }
@@ -356,17 +403,17 @@ class BJJ3DEngine {
 
     switch (presetName) {
       case "top": // Top-Down View
-        this.animateCameraPosition(0, 4.5, 0.1, 0, 0.3, 0);
+        this.animateCameraPosition(0, 4.2, 0.1, 0, 0.4, 0);
         break;
       case "side": // Side Profile Angle
-        this.animateCameraPosition(3.6, 1.2, 0, 0, 0.4, 0);
+        this.animateCameraPosition(3.2, 1.3, 0, 0, 0.45, 0);
         break;
       case "tight": // Close Grip Angle
-        this.animateCameraPosition(1.4, 1.2, 1.6, 0, 0.45, 0);
+        this.animateCameraPosition(1.2, 1.1, 1.4, 0, 0.5, 0);
         break;
       case "default":
       default: // 3/4 Isometric Perspective
-        this.animateCameraPosition(2.6, 2.3, 3.9, 0, 0.5, 0);
+        this.animateCameraPosition(2.4, 2.0, 3.4, 0, 0.45, 0);
         break;
     }
   }
@@ -416,6 +463,10 @@ class BJJ3DEngine {
   animate() {
     this.animationId = requestAnimationFrame(() => this.animate());
 
+    // Lerp update joint animations smoothly
+    if (this.toriRig) this.toriRig.animateLerp(0.12);
+    if (this.ukeRig) this.ukeRig.animateLerp(0.12);
+
     if (this.controls) {
       this.controls.update();
     }
@@ -453,5 +504,4 @@ class BJJ3DEngine {
 }
 
 window.BJJ3DEngine = BJJ3DEngine;
-window.GrapplePoseExtractor = GrapplePoseExtractor;
 window.GrappleHumanoidRig = GrappleHumanoidRig;
