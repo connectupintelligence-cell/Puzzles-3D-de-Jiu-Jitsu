@@ -1,10 +1,9 @@
 /**
- * BJJ 3D Engine - Motor 3D com Anatomia Orgânica Avançada & Suporte GLTF
- * Transforma os modelos 3D em manequins anatômicos realistas com proporções humanas,
- * articulações esféricas orgânicas e posições exatas de combate de Jiu-Jitsu.
+ * BJJ 3D Engine - Motor 3D Baseado no Repositório Oficial GrappleMap (Eelis/GrappleMap)
+ * Implementa rigorosamente os 28 segmentos corporais e 23 articulações do padrão GrappleMap (Eelis).
  */
 
-// ── Joint Index Reference (GrappleMap Standard) ──────────────────────────────
+// ── GrappleMap Standard Joint Indices (Eelis/GrappleMap) ─────────────────────
 // 0:LeftToe   1:RightToe   2:LeftHeel   3:RightHeel
 // 4:LeftAnkle 5:RightAnkle 6:LeftKnee  7:RightKnee
 // 8:LeftHip   9:RightHip  10:LeftShoulder 11:RightShoulder
@@ -66,36 +65,36 @@ class BJJPoseBuilder {
     }
   }
 
-  // ── 1. Guarda Fechada Por Baixo (Tori de costas no chão, pernas envolvendo o Uke)
+  // ── 1. Guarda Fechada Por Baixo (GrappleMap Eelis Standard)
   static createClosedGuardBottom() {
     return [
-      [-0.06, 0.28, 0.25], // 0:LeftToe (Cruzado atrás das costas do Uke)
+      [-0.06, 0.28, 0.25], // 0:LeftToe
       [ 0.06, 0.28, 0.25], // 1:RightToe
       [-0.06, 0.26, 0.22], // 2:LeftHeel
       [ 0.06, 0.26, 0.22], // 3:RightHeel
       [-0.08, 0.26, 0.20], // 4:LeftAnkle
       [ 0.08, 0.26, 0.20], // 5:RightAnkle
-      [-0.26, 0.32, 0.08], // 6:LeftKnee (Envolvendo as costelas do Uke)
+      [-0.26, 0.32, 0.08], // 6:LeftKnee
       [ 0.26, 0.32, 0.08], // 7:RightKnee
-      [-0.14, 0.08, -0.08],// 8:LeftHip (No tatame)
+      [-0.14, 0.08, -0.08],// 8:LeftHip
       [ 0.14, 0.08, -0.08],// 9:RightHip
       [-0.22, 0.08, -0.42],// 10:LeftShoulder
       [ 0.22, 0.08, -0.42],// 11:RightShoulder
-      [-0.25, 0.22, -0.22],// 12:LeftElbow (Flexionado puxando gola)
+      [-0.25, 0.22, -0.22],// 12:LeftElbow
       [ 0.25, 0.22, -0.22],// 13:RightElbow
-      [-0.10, 0.36, -0.05],// 14:LeftWrist (Segurando a gola do Uke)
-      [ 0.12, 0.36, -0.05],// 15:RightWrist (Segurando a manga)
+      [-0.10, 0.36, -0.05],// 14:LeftWrist
+      [ 0.12, 0.36, -0.05],// 15:RightWrist
       [-0.10, 0.34, -0.02],// 16:LeftHand
       [ 0.12, 0.34, -0.02],// 17:RightHand
       [-0.10, 0.32, 0.0],  // 18:LeftFingers
       [ 0.12, 0.32, 0.0],  // 19:RightFingers
-      [ 0.0,  0.08, -0.15],// 20:Core (No chão)
+      [ 0.0,  0.08, -0.15],// 20:Core
       [ 0.0,  0.08, -0.48],// 21:Neck
       [ 0.0,  0.10, -0.60] // 22:Head
     ];
   }
 
-  // ── 1. Guarda Fechada Por Cima (Uke ajoelhado entre as pernas do Tori com postura quebrada)
+  // ── 1. Guarda Fechada Por Cima
   static createClosedGuardTopBroken() {
     return [
       [-0.18, 0.02, 0.38], // 0:LeftToe
@@ -104,45 +103,45 @@ class BJJPoseBuilder {
       [ 0.18, 0.02, 0.32], // 3:RightHeel
       [-0.18, 0.04, 0.28], // 4:LeftAnkle
       [ 0.18, 0.04, 0.28], // 5:RightAnkle
-      [-0.22, 0.05, 0.08], // 6:LeftKnee (Ajoelhado no solo)
+      [-0.22, 0.05, 0.08], // 6:LeftKnee
       [ 0.22, 0.05, 0.08], // 7:RightKnee
       [-0.14, 0.25, 0.15], // 8:LeftHip
       [ 0.14, 0.25, 0.15], // 9:RightHip
-      [-0.20, 0.38, -0.18],// 10:LeftShoulder (Projetado à frente)
+      [-0.20, 0.38, -0.18],// 10:LeftShoulder
       [ 0.20, 0.38, -0.18],// 11:RightShoulder
       [-0.22, 0.22, -0.10],// 12:LeftElbow
       [ 0.22, 0.22, -0.10],// 13:RightElbow
-      [-0.12, 0.15, -0.28],// 14:LeftWrist (Apoiado na costela do Tori)
+      [-0.12, 0.15, -0.28],// 14:LeftWrist
       [ 0.12, 0.15, -0.28],// 15:RightWrist
       [-0.12, 0.14, -0.30],// 16:LeftHand
       [ 0.12, 0.14, -0.30],// 17:RightHand
       [-0.12, 0.12, -0.32],// 18:LeftFingers
       [ 0.12, 0.12, -0.32],// 19:RightFingers
       [ 0.0,  0.30, 0.0],  // 20:Core
-      [ 0.0,  0.42, -0.25],// 21:Neck (Inclinado para frente)
-      [ 0.0,  0.45, -0.38] // 22:Head (Baixo próximo ao peito do Tori)
+      [ 0.0,  0.42, -0.25],// 21:Neck
+      [ 0.0,  0.45, -0.38] // 22:Head
     ];
   }
 
-  // ── 2. Fuga de Quadril & Escudo de Canela (Tori de lado abrindo espaço)
+  // ── 2. Fuga de Quadril & Escudo de Canela
   static createHipEscapeGuard() {
     return [
-      [-0.22, 0.02, 0.18], // 0:LeftToe (Pé esquerdo firme no chão para fugir o quadril)
+      [-0.22, 0.02, 0.18], // 0:LeftToe
       [ 0.12, 0.32, 0.05], // 1:RightToe
       [-0.22, 0.02, 0.12], // 2:LeftHeel
       [ 0.12, 0.30, 0.02], // 3:RightHeel
       [-0.22, 0.05, 0.08], // 4:LeftAnkle
       [ 0.12, 0.28, -0.02],// 5:RightAnkle
-      [-0.30, 0.25, 0.02], // 6:LeftKnee (Fuga de quadril lateral)
-      [ 0.02, 0.32, -0.12],// 7:RightKnee (Canela cruzada no estérno do Uke)
-      [-0.20, 0.10, -0.12],// 8:LeftHip (Quadril de lado no tatame)
+      [-0.30, 0.25, 0.02], // 6:LeftKnee
+      [ 0.02, 0.32, -0.12],// 7:RightKnee
+      [-0.20, 0.10, -0.12],// 8:LeftHip
       [-0.02, 0.12, -0.12],// 9:RightHip
       [-0.25, 0.10, -0.44],// 10:LeftShoulder
       [ 0.12, 0.15, -0.42],// 11:RightShoulder
       [-0.28, 0.22, -0.28],// 12:LeftElbow
       [ 0.15, 0.32, -0.22],// 13:RightElbow
-      [-0.12, 0.38, -0.10],// 14:LeftWrist (Pegada na gola)
-      [ 0.10, 0.38, -0.10],// 15:RightWrist (Pegada na manga)
+      [-0.12, 0.38, -0.10],// 14:LeftWrist
+      [ 0.10, 0.38, -0.10],// 15:RightWrist
       [-0.12, 0.36, -0.08],// 16:LeftHand
       [ 0.10, 0.36, -0.08],// 17:RightHand
       [-0.12, 0.34, -0.06],// 18:LeftFingers
@@ -157,7 +156,6 @@ class BJJPoseBuilder {
     return BJJPoseBuilder.createClosedGuardTopBroken();
   }
 
-  // ── 3. Escala da Canela no Tórax (Tesourinha Carregada)
   static createScissorLoaded() {
     return BJJPoseBuilder.createHipEscapeGuard();
   }
@@ -167,24 +165,24 @@ class BJJPoseBuilder {
     return u.map(([x, y, z]) => [x + 0.18, y + 0.05, z]);
   }
 
-  // ── 4. Montada Por Cima (Tori montado sobre o tronco do Uke)
+  // ── 4. Montada Por Cima
   static createMountedTop() {
     return [
-      [-0.24, 0.04, -0.30], // 0:LeftToe (Pés junto ao quadril do Uke)
+      [-0.24, 0.04, -0.30], // 0:LeftToe
       [ 0.24, 0.04, -0.30], // 1:RightToe
       [-0.24, 0.04, -0.24], // 2:LeftHeel
       [ 0.24, 0.04, -0.24], // 3:RightHeel
       [-0.24, 0.06, -0.18], // 4:LeftAnkle
       [ 0.24, 0.06, -0.18], // 5:RightAnkle
-      [-0.28, 0.15, 0.02],  // 6:LeftKnee (Joelhos prensados nas costelas)
+      [-0.28, 0.15, 0.02],  // 6:LeftKnee
       [ 0.28, 0.15, 0.02],  // 7:RightKnee
-      [-0.14, 0.42, -0.08], // 8:LeftHip (Sentado sobre o abdômen)
+      [-0.14, 0.42, -0.08], // 8:LeftHip
       [ 0.14, 0.42, -0.08], // 9:RightHip
       [-0.20, 0.78, -0.18], // 10:LeftShoulder
       [ 0.20, 0.78, -0.18], // 11:RightShoulder
       [-0.25, 0.52, 0.05],  // 12:LeftElbow
       [ 0.25, 0.52, 0.05],  // 13:RightElbow
-      [-0.18, 0.32, 0.15],  // 14:LeftWrist (Mãos no peito do Uke)
+      [-0.18, 0.32, 0.15],  // 14:LeftWrist
       [ 0.18, 0.32, 0.15],  // 15:RightWrist
       [-0.18, 0.30, 0.18],  // 16:LeftHand
       [ 0.18, 0.30, 0.18],  // 17:RightHand
@@ -196,7 +194,7 @@ class BJJPoseBuilder {
     ];
   }
 
-  // ── 4. Montada Por Baixo (Uke de costas no tatame sob a montada)
+  // ── 4. Montada Por Baixo
   static createMountedBottom() {
     return [
       [-0.16, 0.02, 0.55], // 0:LeftToe
@@ -205,13 +203,13 @@ class BJJPoseBuilder {
       [ 0.16, 0.02, 0.48], // 3:RightHeel
       [-0.16, 0.05, 0.42], // 4:LeftAnkle
       [ 0.16, 0.05, 0.42], // 5:RightAnkle
-      [-0.20, 0.12, 0.22], // 6:LeftKnee (No tatame)
+      [-0.20, 0.12, 0.22], // 6:LeftKnee
       [ 0.20, 0.12, 0.22], // 7:RightKnee
       [-0.14, 0.08, -0.08],// 8:LeftHip
       [ 0.14, 0.08, -0.08],// 9:RightHip
       [-0.22, 0.08, -0.42],// 10:LeftShoulder
       [ 0.22, 0.08, -0.42],// 11:RightShoulder
-      [-0.25, 0.22, -0.22],// 12:LeftElbow (Defendendo a gola)
+      [-0.25, 0.22, -0.22],// 12:LeftElbow
       [ 0.25, 0.22, -0.22],// 13:RightElbow
       [-0.12, 0.35, -0.08],// 14:LeftWrist
       [ 0.12, 0.35, -0.08],// 15:RightWrist
@@ -219,13 +217,13 @@ class BJJPoseBuilder {
       [ 0.12, 0.32, -0.05],// 17:RightHand
       [-0.12, 0.30, -0.02],// 18:LeftFingers
       [ 0.12, 0.30, -0.02],// 19:RightFingers
-      [ 0.0,  0.08, -0.18],// 20:Core (Flat no chão)
+      [ 0.0,  0.08, -0.18],// 20:Core
       [ 0.0,  0.08, -0.48],// 21:Neck
       [ 0.0,  0.08, -0.60] // 22:Head
     ];
   }
 
-  // ── 5. Imobilização Lateral (Side Control)
+  // ── 5. Imobilização Lateral
   static createSideControlTop() {
     return [
       [-0.32, 0.02, 0.15], // 0:LeftToe
@@ -234,13 +232,13 @@ class BJJPoseBuilder {
       [ 0.32, 0.02, 0.08], // 3:RightHeel
       [-0.32, 0.05, 0.04], // 4:LeftAnkle
       [ 0.32, 0.05, 0.04], // 5:RightAnkle
-      [-0.35, 0.12, -0.15],// 6:LeftKnee (Base esparramada de 100kg)
+      [-0.35, 0.12, -0.15],// 6:LeftKnee
       [ 0.35, 0.12, -0.15],// 7:RightKnee
       [-0.14, 0.22, -0.15],// 8:LeftHip
       [ 0.14, 0.22, -0.15],// 9:RightHip
-      [-0.20, 0.28, -0.42],// 10:LeftShoulder (Pressão de ombro no queixo)
+      [-0.20, 0.28, -0.42],// 10:LeftShoulder
       [ 0.20, 0.28, -0.42],// 11:RightShoulder
-      [-0.30, 0.15, -0.28],// 12:LeftElbow (Esgrima sob a cabeça)
+      [-0.30, 0.15, -0.28],// 12:LeftElbow
       [ 0.30, 0.15, -0.28],// 13:RightElbow
       [-0.20, 0.10, -0.08],// 14:LeftWrist
       [ 0.20, 0.10, -0.08],// 15:RightWrist
@@ -303,7 +301,7 @@ class GrappleHumanoidRig {
     this.group = new THREE.Group();
     this.scene.add(this.group);
 
-    // Anatomical Materials
+    // Official Eelis/GrappleMap Athlete Colors & Materials
     this.skinMat = new THREE.MeshStandardMaterial({
       color: skinColorHex,
       roughness: 0.38,
@@ -333,37 +331,41 @@ class GrappleHumanoidRig {
       metalness: 0.10
     });
 
-    // Segment Defs with Anatomical Radii: [j1, j2, radiusStart, radiusEnd, isSkin]
-    const segmentDefs = [
-      // Spine / Torso
-      [20, 21, 0.085, 0.065, false], // Spine Core to Neck (V-Taper Chest)
-      [21, 22, 0.040, 0.035, true],  // Neck to Head
-      [20, 10, 0.075, 0.060, false], // Core to L Shoulder
-      [20, 11, 0.075, 0.060, false], // Core to R Shoulder
-      [10, 11, 0.065, 0.065, false], // Shoulder Collar
-      [20,  8, 0.075, 0.060, false], // Core to L Hip
-      [20,  9, 0.075, 0.060, false], // Core to R Hip
-      [ 8,  9, 0.065, 0.065, false], // Pelvis Line
-      // Left Leg
-      [ 8,  6, 0.068, 0.052, false], // L Thigh
-      [ 6,  4, 0.050, 0.038, false], // L Calf
-      [ 4,  0, 0.028, 0.018, true],  // L Foot
-      // Right Leg
-      [ 9,  7, 0.068, 0.052, false], // R Thigh
-      [ 7,  5, 0.050, 0.038, false], // R Calf
-      [ 5,  1, 0.028, 0.018, true],  // R Foot
-      // Left Arm
-      [10, 12, 0.050, 0.038, false], // L Upper Arm
-      [12, 14, 0.038, 0.028, false], // L Forearm
-      [14, 16, 0.025, 0.018, true],  // L Hand
-      // Right Arm
-      [11, 13, 0.050, 0.038, false], // R Upper Arm
-      [13, 15, 0.038, 0.028, false], // R Forearm
-      [15, 17, 0.025, 0.018, true]   // R Hand
+    // ── Official Eelis/GrappleMap 28 Segment Table ──
+    // [j1, j2, radius, isSkin]
+    const eelisSegments = [
+      [0, 2, 0.025, true],   // LeftToe -> LeftHeel
+      [0, 4, 0.025, true],   // LeftToe -> LeftAnkle
+      [2, 4, 0.025, true],   // LeftHeel -> LeftAnkle
+      [4, 6, 0.055, false],  // LeftAnkle -> LeftKnee (Calf)
+      [6, 8, 0.085, false],  // LeftKnee -> LeftHip (Thigh)
+      [8, 20, 0.100, false], // LeftHip -> Core
+      [20, 10, 0.075, false],// Core -> LeftShoulder
+      [10, 12, 0.060, false],// LeftShoulder -> LeftElbow
+      [12, 14, 0.030, false],// LeftElbow -> LeftWrist
+      [14, 16, 0.020, true], // LeftWrist -> LeftHand
+      [16, 18, 0.020, true], // LeftHand -> LeftFingers
+      [14, 18, 0.020, false],// LeftWrist -> LeftFingers
+      [1, 3, 0.025, true],   // RightToe -> RightHeel
+      [1, 5, 0.025, true],   // RightToe -> RightAnkle
+      [3, 5, 0.025, true],   // RightHeel -> RightAnkle
+      [5, 7, 0.055, false],  // RightAnkle -> RightKnee (Calf)
+      [7, 9, 0.085, false],  // RightKnee -> RightHip (Thigh)
+      [9, 20, 0.100, false], // RightHip -> Core
+      [20, 11, 0.075, false],// Core -> RightShoulder
+      [11, 13, 0.060, false],// RightShoulder -> RightElbow
+      [13, 15, 0.030, false],// RightElbow -> RightWrist
+      [15, 17, 0.020, true], // RightWrist -> RightHand
+      [17, 19, 0.020, true], // RightHand -> RightFingers
+      [15, 19, 0.020, false],// RightWrist -> RightFingers
+      [8, 9, 0.100, false],  // LeftHip -> RightHip (Pelvis Line)
+      [10, 21, 0.065, false],// LeftShoulder -> Neck
+      [11, 21, 0.065, false],// RightShoulder -> Neck
+      [21, 22, 0.050, true]  // Neck -> Head
     ];
 
-    this.segments = segmentDefs.map(([j1, j2, r1, r2, isSkin]) => {
-      const geo = new THREE.CylinderGeometry(r2, r1, 1, 14, 1);
+    this.segments = eelisSegments.map(([j1, j2, r, isSkin]) => {
+      const geo = new THREE.CylinderGeometry(r, r, 1, 14, 1);
       const mesh = new THREE.Mesh(geo, isSkin ? this.skinMat : this.giMat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -371,23 +373,39 @@ class GrappleHumanoidRig {
       return { mesh, j1, j2 };
     });
 
-    // Anatomical Joint Caps (Deltoids & Knee Spheres)
-    this.jointCaps = [];
-    const jointIndices = [10, 11, 6, 7, 12, 13];
-    jointIndices.forEach(jIdx => {
-      const isArm = (jIdx === 10 || jIdx === 11 || jIdx === 12 || jIdx === 13);
-      const radius = isArm ? 0.052 : 0.058;
-      const sphere = new THREE.Mesh(new THREE.SphereGeometry(radius, 14, 14), isArm ? this.giMat : this.giMat);
+    // ── Official Eelis/GrappleMap 23 Joint Spheres ──
+    const eelisJoints = [
+      [0, 0.025, true],  // 0:LeftToe
+      [1, 0.025, true],  // 1:RightToe
+      [2, 0.030, true],  // 2:LeftHeel
+      [3, 0.030, true],  // 3:RightHeel
+      [4, 0.030, true],  // 4:LeftAnkle
+      [5, 0.030, true],  // 5:RightAnkle
+      [6, 0.050, false], // 6:LeftKnee
+      [7, 0.050, false], // 7:RightKnee
+      [8, 0.090, false], // 8:LeftHip
+      [9, 0.090, false], // 9:RightHip
+      [10, 0.080, false],// 10:LeftShoulder
+      [11, 0.080, false],// 11:RightShoulder
+      [12, 0.045, false],// 12:LeftElbow
+      [13, 0.045, false],// 13:RightElbow
+      [14, 0.020, true], // 14:LeftWrist
+      [15, 0.020, true], // 15:RightWrist
+      [16, 0.020, true], // 16:LeftHand
+      [17, 0.020, true], // 17:RightHand
+      [18, 0.020, true], // 18:LeftFingers
+      [19, 0.020, true], // 19:RightFingers
+      [20, 0.100, false],// 20:Core
+      [21, 0.050, false],// 21:Neck
+      [22, 0.110, true]  // 22:Head
+    ];
+
+    this.jointSpheres = eelisJoints.map(([jIdx, r, isSkin]) => {
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 14), isSkin ? this.skinMat : this.giMat);
       sphere.castShadow = true;
       this.group.add(sphere);
-      this.jointCaps.push({ sphere, jIdx });
+      return { sphere, jIdx };
     });
-
-    // Head Sphere with Jaw Taper
-    this.head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 20, 20), this.skinMat);
-    this.head.scale.set(0.92, 1.08, 0.98);
-    this.head.castShadow = true;
-    this.group.add(this.head);
 
     // BJJ Gi Lapel Collar V-Cross
     this.lapelL = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.28, 0.035), this.lapelMat);
@@ -445,7 +463,7 @@ class GrappleHumanoidRig {
     const UP = new THREE.Vector3(0, 1, 0);
     const D = new THREE.Vector3();
 
-    // 1. Position Segment Cylinders
+    // 1. Position Eelis 28 Segment Cylinders
     this.segments.forEach(({ mesh, j1, j2 }) => {
       const a = P(j1), b = P(j2);
       D.subVectors(b, a);
@@ -460,16 +478,12 @@ class GrappleHumanoidRig {
       mesh.quaternion.setFromUnitVectors(UP, D.normalize());
     });
 
-    // 2. Position Joint Spheres
-    this.jointCaps.forEach(({ sphere, jIdx }) => {
+    // 2. Position Eelis 23 Joint Spheres
+    this.jointSpheres.forEach(({ sphere, jIdx }) => {
       sphere.position.copy(P(jIdx));
     });
 
-    // 3. Position Head
-    const headPos = P(22);
-    this.head.position.copy(headPos);
-
-    // 4. Orient Gi Lapel Collar to Chest Spine Segment (Joint 20 -> Joint 21)
+    // 3. Orient Gi Lapel Collar to Chest Spine Segment
     const corePos = P(20);
     const neckPos = P(21);
     const spine = neckPos.clone().sub(corePos);
@@ -486,7 +500,7 @@ class GrappleHumanoidRig {
     this.lapelL.quaternion.setFromUnitVectors(UP, spine.clone().normalize());
     this.lapelR.quaternion.setFromUnitVectors(UP, spine.clone().normalize());
 
-    // 5. Position Belt Ring & Knot on Waist Line
+    // 4. Position Belt Ring & Knot on Waist Line
     const lHip = P(8);
     const rHip = P(9);
     const waistPos = corePos.clone().add(lHip.clone().add(rHip).multiplyScalar(0.5)).multiplyScalar(0.5);
@@ -518,9 +532,9 @@ class BJJ3DEngine {
     this.renderer = null;
     this.controls = null;
 
-    // 3D Humanoid Rigs (GrappleMap 23-Joint System)
-    this.toriRig = null; // Tori (Royal Blue Gi)
-    this.ukeRig = null;  // Uke (Dark Carbon Gi)
+    // 3D Humanoid Rigs (Official Eelis/GrappleMap 28-Segment System)
+    this.toriRig = null; // Athlete A (Color #D4CBC0 / Royal Blue Gi)
+    this.ukeRig = null;  // Athlete B (Color #1E3A6E / Dark Carbon Gi)
     this.matGroup = null;
 
     // Animation & State
@@ -652,10 +666,9 @@ class BJJ3DEngine {
   }
 
   buildFighters() {
-    // Tori: Skin tone 0xe0a96d, Royal Blue Gi 0x1d4ed8
-    this.toriRig = new GrappleHumanoidRig(this.scene, 0xe0a96d, 0x1d4ed8, true);
-    // Uke: Skin tone 0xd49b6a, Dark Carbon Gi 0x1e293b
-    this.ukeRig = new GrappleHumanoidRig(this.scene, 0xd49b6a, 0x1e293b, false);
+    // Official GrappleMap Athlete Colors: #D4CBC0 (Athlete A) & #1E3A6E (Athlete B)
+    this.toriRig = new GrappleHumanoidRig(this.scene, 0xd4cbc0, 0x1d4ed8, true);
+    this.ukeRig = new GrappleHumanoidRig(this.scene, 0x1e3a6e, 0x1e293b, false);
 
     // Initial default pose: Closed Guard
     const initialPose = BJJPoseBuilder.getPoseJoints("closed_guard_bottom");
